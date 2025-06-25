@@ -1,0 +1,39 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+
+# Virtual environment
+venv/
+env/
+
+# VS Code settings
+.vscode/
+
+# Logs
+*.log
+
+# Python environments
+*.env
+.env
+.env.*
+
+# Local PostgreSQL dump / config files (nếu có)
+*.pgsql
+*.psql
+
+# Mac / Windows OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Cache and model temp
+*.pth
+*.pt
+*.onnx
+
+# Other model cache (torch, transformers...)
+.cache/

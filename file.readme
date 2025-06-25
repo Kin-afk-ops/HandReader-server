@@ -1,0 +1,18 @@
+server/
+├── app/
+│   ├── __init__.py            # Khởi tạo Flask app, CORS, DB
+│   ├── config.py              # Cấu hình DB, các biến môi trường
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   └── ocr_routes.py      # API xử lý ảnh (OCR)
+│   ├── services/
+│   │   └── vietocr_service.py # Gọi VietOCR xử lý ảnh base64
+│   ├── models/
+│   │   └── history.py         # Model SQLAlchemy: lưu lịch sử nhận dạng
+│   ├── utils/
+│   │   └── helpers.py         # Tiện ích chung (decode ảnh, v.v.)
+├── migrations/                # Thư mục quản lý migration của DB (nếu dùng Flask-Migrate)
+├── instance/
+│   └── .env                   # Thông tin bảo mật (DB_URL, SECRET_KEY)
+├── requirements.txt           # Danh sách thư viện cần cài
+├── run.py                     # File chạy app chính
