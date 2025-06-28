@@ -6,9 +6,10 @@ import cv2
 
 # Load model khi server khởi động
 config = Cfg.load_config_from_name('vgg_transformer')
-config['weights'] = './model/transformerocr.pth'
+config['weights'] = './model/transformerocr2.pth'
 config['device'] = 'cuda' if torch.cuda.is_available() else 'cpu'
-config['predictor']['beamsearch'] = True
+config['vocab'] = "aAàÀảẢãÃáÁạẠăĂằẰẳẲẵẴắẮặẶâÂầẦẩẨẫẪấẤậẬbBcCdDđĐeEèÈẻẺẽẼéÉẹẸêÊềỀểỂễỄếẾệỆfFgGhHiIìÌỉỈĩĨíÍịỊjJkKlLmMnNoOòÒỏỎõÕóÓọỌôÔồỒổỔỗỖốỐộỘơƠờỜởỞỡỠớỚợỢpPqQrRsStTuUùÙủỦũŨúÚụỤưƯừỪửỬữỮứỨựỰvVwWxXyYỳỲỷỶỹỸýÝỵỴzZ0123456789!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ –—‘’“”…"
+config['predictor']['beamsearch'] = False
 
 
 def resize_image(image, width=256):
@@ -24,3 +25,33 @@ def predict_text_from_image(image_np):
     image_pil = Image.fromarray(image)
     result = predictor.predict(image_pil)
     return result
+
+
+def split_lines_from_image(image, threshold=2):
+    # """
+    # Tách dòng từ ảnh văn bản bằng histogram theo hàng.
+    # Trả về danh sách ảnh numpy (mỗi ảnh là 1 dòng).
+    # """
+
+    # Nếu ảnh là grayscale hoặc màu, xử lý về grayscale
+    if len(image.shape) == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Nhị phân hóa ảnh (chữ trắng trên nền đen)
+    _, threshed = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+
+    # Tính histogram theo chiều dọc (theo hàng)
+    hist = cv2.reduce(threshed, 1, cv2.REDUCE_AVG).reshape(-1)
+
+    H = image.shape[0]
+    uppers = [y for y in range(H-1) if hist[y] <= threshold and hist[y+1] > threshold]
+    lowers = [y for y in range(H-1) if hist[y] > threshold and hist[y+1] <= threshold]
+
+    # Trả về list ảnh dòng
+    lines = []
+    for i in range(min(len(uppers), len(lowers))):
+        line_img = image[uppers[i]:lowers[i], :]
+        if line_img.shape[0] > 10:  # loại bỏ nhiễu dòng quá nhỏ
+            lines.append(line_img)
+
+    return lines
