@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.utils.helpers import base64_to_image
-from app.services.vietocr_service import predict_text_from_image, split_lines_from_image
+from app.services.vietocr_service import predict_text_from_image, split_lines_from_image,predict_from_base64
 
 ocr_bp = Blueprint("ocr", __name__)
 
@@ -42,6 +42,7 @@ def predict():
         print("✅ Chuyển base64 thành ảnh xong")
 
         print("⏳ Đang nhận diện văn bản...")
+        # result_text =  predict_from_base64(base64_img)
         result_text = predict_text_from_image(image)
 
         print("✅ Kết quả:", result_text)
