@@ -1,8 +1,19 @@
 import os
 from flask import Flask
 from flask_cors import CORS , cross_origin
-from app.models.user_model import User  # ✅ Import model ở đây
+from app.models.user_model import User
+from app.models.recognition_result_model import RecognitionResult  
+from app.models.image_model import Image  
 from app.models.note_model import Note
+from app.models.feedback_model import Feedback
+from app.models.notification_model import Notification
+from app.models.admin_action_model import AdminAction
+from app.models.error_log_model import ErrorLog
+from app.models.guide_model import Guide
+from app.models.guide_step_model import GuideStep
+from app.models.guide_progress_model import GuideProgress
+from app.models.history_model import History
+from app.models.voice_command_model import VoiceCommand
 from dotenv import load_dotenv
 
 
@@ -25,6 +36,7 @@ def create_app():
 
       # ✅ Phải đặt sau khi init_app và import model
     with app.app_context():
+        # db.drop_all()
         db.create_all()
 
     app.config["CORS_HEADERS"] = "Content-Type"
@@ -33,12 +45,39 @@ def create_app():
     from app.routes.db_routes import db_routes
     from app.routes.note_routes import note_routes
     from app.routes.user_routes import user_routes
+    from app.routes.image_routes import image_routes
+    from app.routes.recognition_result_routes import recognition_result_bp
+    from app.routes.feedback_routes import feedback_routes
+    from app.routes.notification_routes import notification_routes
+    from app.routes.admin_action_routes import admin_action_routes
+    from app.routes.error_log_routes import error_log_routes
+    from app.routes.guide_routes import guide_routes
+    from app.routes.guide_step_routes import guide_step_bp
+    from app.routes.guide_progress_routes import guide_progress_bp
+    from app.routes.history_routes import history_routes
+    from app.routes.voice_command_routes import voice_command_routes
+
+
+
+
 
 
     app.register_blueprint(ocr_bp)
     app.register_blueprint(db_routes)
     app.register_blueprint(note_routes)
     app.register_blueprint(user_routes)
+    app.register_blueprint(recognition_result_bp)
+    app.register_blueprint(image_routes)
+    app.register_blueprint(feedback_routes)
+    app.register_blueprint(notification_routes)
+    app.register_blueprint(admin_action_routes)
+    app.register_blueprint(error_log_routes)
+    app.register_blueprint(guide_routes)
+    app.register_blueprint(guide_step_bp)
+    app.register_blueprint(guide_progress_bp)
+    app.register_blueprint(history_routes)
+    app.register_blueprint(voice_command_routes)
+
     return app
 
 

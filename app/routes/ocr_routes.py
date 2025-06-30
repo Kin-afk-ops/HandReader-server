@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app.utils.helpers import base64_to_image
 from app.services.vietocr_service import predict_text_from_image, split_lines_from_image,predict_from_base64
+import numpy as np
+from PIL import Image
 
 ocr_bp = Blueprint("ocr", __name__)
 
@@ -14,11 +16,15 @@ def predict_paragraph():
             return jsonify({"error": "No image provided"}), 400
 
         image = base64_to_image(base64_img)
-        line_images = split_lines_from_image(image)
+        image_np = np.array(image)
+        line_images = split_lines_from_image(image_np)
+
+        lines_pil = [Image.fromarray(line).convert("RGB") for line in line_images]
         print(f"[DEBUG] Tách được {len(line_images)} dòng")
 
         full_text = ""
-        for line_img in line_images:
+        for line_img in lines_pil:
+            
             result = predict_text_from_image(line_img)
             full_text += result.strip() + "\n"
 
