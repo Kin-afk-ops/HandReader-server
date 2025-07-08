@@ -8,6 +8,7 @@ import io
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
+import requests
 
 
 # Load model khi server khởi động
@@ -18,13 +19,13 @@ import numpy as np
 # config['predictor']['beamsearch'] = False
 # config['cnn']['pretrained']=False
 # config = Cfg.load_config_from_file("./model/config (1).yml")
-config = Cfg.load_config_from_name('vgg_transformer') 
+# config = Cfg.load_config_from_name('vgg_transformer') 
 # config['weights'] = './model/transformerocr (3).pth'
 
-config['cnn']['pretrained']=False
-config['device'] = 'cuda' if torch.cuda.is_available() else 'cpu'
-config['predictor']['beamsearch']=False
-predictor = Predictor(config)
+# config['cnn']['pretrained']=False
+# config['device'] = 'cuda' if torch.cuda.is_available() else 'cpu'
+# config['predictor']['beamsearch']=False
+# predictor = Predictor(config)
 
 
 def resize_padding(img, size=(32, 512), pad_color=255):
@@ -53,9 +54,30 @@ def resize_padding(img, size=(32, 512), pad_color=255):
 
 
 
-def predict_text_from_image(image_np):
-    result = predictor.predict(image_np)
-    return result
+# def predict_text_from_image(image_np):
+#     result = predictor.predict(image_np)
+#     return result
+
+
+
+def predict_text_from_image( base64_img):
+    response = requests.post(
+        url="https://primate-crucial-blatantly.ngrok-free.app/ocr",
+        json={
+            "base64_img":base64_img
+            
+        }
+    )
+
+    print("response in: ", response.elapsed.total_seconds() )
+
+    if response.status_code == 200:
+        return response.json().get("response_message")
+    else:
+        print("error", response.status_code, response.text)
+        return None
+
+
 
 
 # ----- Tách dòng từ ảnh -----

@@ -4,6 +4,7 @@ from app.services.vietocr_service import predict_text_from_image, split_lines_fr
 import numpy as np
 from PIL import Image
 
+
 ocr_bp = Blueprint("ocr", __name__)
 
 @ocr_bp.route("/predict-paragraph", methods=["POST"])
@@ -12,25 +13,32 @@ def predict_paragraph():
         data = request.get_json()
         base64_img = data.get("image")
 
-        if not base64_img:
-            return jsonify({"error": "No image provided"}), 400
+        # if not base64_img:
+        #     return jsonify({"error": "No image provided"}), 400
 
-        image = base64_to_image(base64_img)
-        image_np = np.array(image)
-        line_images = split_lines_from_image(image_np)
+        # image = base64_to_image(base64_img)
+        # image_np = np.array(image)
+        # line_images = split_lines_from_image(image_np)
 
-        lines_pil = [Image.fromarray(line).convert("RGB") for line in line_images]
-        print(f"[DEBUG] Tách được {len(line_images)} dòng")
+        # lines_pil = [Image.fromarray(line).convert("RGB") for line in line_images]
+        # print(f"[DEBUG] Tách được {len(line_images)} dòng")
 
-        full_text = ""
-        for line_img in lines_pil:
+        # full_text = ""
+        # for line_img in lines_pil:
             
-            result = predict_text_from_image(line_img)
-            full_text += result.strip() + "\n"
+        #     result = predict_text_from_image(line_img)
+        #     full_text += result.strip() + "\n"
+        image_path = "https://chillfont.vn/wp-content/uploads/2025/02/Font-chu-tieu-hoc-la-gi.webp"
 
-        return jsonify({"text": full_text.strip()}), 200
+        full_text = predict_text_from_image(base64_img)
+
+        return jsonify({"text": full_text}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+  
+
+
+
 
 
 @ocr_bp.route("/predict", methods=["POST"])
