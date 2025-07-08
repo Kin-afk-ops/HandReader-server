@@ -1,6 +1,7 @@
 from app import db
 from app.models.user_model import User
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 
 def create_user_service(data):
     hashed_password = generate_password_hash(data.get("password"))
@@ -18,3 +19,28 @@ def create_user_service(data):
 
 def get_all_users_service():
     return User.query.all()
+
+
+def update_user_service(user_id, data):
+    user = User.query.get(user_id)
+    if not user:
+        return None
+
+    # Cập nhật thông tin
+    user.name = data.get("name", user.name)
+    user.email = data.get("email", user.email)
+    user.role = data.get("role", user.role)
+    user.updated_at = datetime.utcnow()
+    db.session.commit()
+    return user
+
+
+
+def delete_user_service(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return False
+
+    db.session.delete(user)
+    db.session.commit()
+    return True

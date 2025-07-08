@@ -12,3 +12,4 @@ class User(db.Model):
     password = db.Column(db.String, nullable=True, comment='Chỉ cần cho admin/super_admin')
     role = db.Column(db.String, nullable=False, comment='user | admin | super_admin')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)  

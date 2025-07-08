@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from flask_cors import CORS , cross_origin
+from flask_jwt_extended import JWTManager
 from app.models.user_model import User
 from app.models.recognition_result_model import RecognitionResult  
 from app.models.image_model import Image  
@@ -19,8 +20,12 @@ from dotenv import load_dotenv
 
 from flask import Flask
 
+
 # Khoi tao flask server
 from app.extensions import db  
+
+# Khoi tao jwt 
+jwt = JWTManager()
 
 def create_app():
     app = Flask(__name__)
@@ -32,7 +37,14 @@ def create_app():
     f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}@"
     f"{os.getenv('DB_HOST')}:{int(os.getenv('DB_PORT', 5432))}/{os.getenv('DB_NAME')}")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY", "super-secret-key") 
+    
+    
+    jwt.init_app(app)
     db.init_app(app) 
+
+
+   
 
       # ✅ Phải đặt sau khi init_app và import model
     with app.app_context():
@@ -56,6 +68,7 @@ def create_app():
     from app.routes.guide_progress_routes import guide_progress_bp
     from app.routes.history_routes import history_routes
     from app.routes.voice_command_routes import voice_command_routes
+    from app.routes.auth_route import auth_route
 
 
 
@@ -77,6 +90,7 @@ def create_app():
     app.register_blueprint(guide_progress_bp)
     app.register_blueprint(history_routes)
     app.register_blueprint(voice_command_routes)
+    app.register_blueprint(auth_route)
 
     return app
 
