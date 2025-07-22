@@ -31,6 +31,7 @@ def predict_paragraph():
         image_path = "https://chillfont.vn/wp-content/uploads/2025/02/Font-chu-tieu-hoc-la-gi.webp"
 
         full_text = predict_text_from_image(base64_img)
+    
 
         return jsonify({"text": full_text}), 200
     except Exception as e:

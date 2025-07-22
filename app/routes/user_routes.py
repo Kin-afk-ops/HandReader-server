@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.services.user_service import create_user_service,update_user_service,delete_user_service
+from app.services.user_service import create_user_service,update_user_service,delete_user_service,get_user_by_uid_service
 from app.models.user_model import User
 
 user_routes = Blueprint("user_routes", __name__)
@@ -38,6 +38,30 @@ def get_all_users():
         return jsonify(user_list), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+
+
+@user_routes.route("/users/<uuid:user_id>", methods=["GET"])
+def get_users(user_id):
+    try:
+        user = get_user_by_uid_service(user_id)
+        if user is None:
+            return jsonify({"error": "User not found"}), 404
+
+        user_data = {
+            "id": str(user.id),
+            "name": user.name,
+            "email": user.email,
+            "role": user.role,
+            "created_at": user.created_at.isoformat()
+        }
+
+        return jsonify(user_data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 

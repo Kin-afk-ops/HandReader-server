@@ -4,7 +4,10 @@ from werkzeug.security import generate_password_hash
 from datetime import datetime
 
 def create_user_service(data):
-    hashed_password = generate_password_hash(data.get("password"))
+    password = data.get("password")
+    hashed_password = None  # <-- đảm bảo có biến này
+    if password:
+        hashed_password = generate_password_hash(password)
     user = User(
         name=data.get("name"),
         email=data.get("email"),
@@ -19,6 +22,11 @@ def create_user_service(data):
 
 def get_all_users_service():
     return User.query.all()
+
+
+def get_user_by_uid_service(userId: str):
+    user = User.query.filter_by(id=userId).first()
+    return user
 
 
 def update_user_service(user_id, data):
