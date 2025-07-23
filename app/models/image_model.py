@@ -11,6 +11,7 @@ class Image(db.Model):
 
     source = db.Column(db.String, nullable=False, comment='upload | camera | livestream')
     image_url = db.Column(db.String, nullable=False)
+    image_public_key = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Quan hệ ngược (nếu cần)

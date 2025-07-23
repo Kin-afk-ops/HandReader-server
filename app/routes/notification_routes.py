@@ -5,7 +5,8 @@ from app.services.notification_service import (
     get_all_notifications,
     get_notification_by_id,
     update_notification,
-    delete_notification
+    delete_notification,
+    get_notification_by_user_id
 )
 
 notification_routes = Blueprint('notification_routes', __name__)
@@ -20,9 +21,20 @@ def create():
 def get_all():
     return jsonify(get_all_notifications())
 
-@notification_routes.route('/notifications/<uuid:notification_id>', methods=['GET'])
-def get_one(notification_id):
+@notification_routes.route('/notifications/noti/<uuid:notification_id>', methods=['GET'])
+def get_one_by_id(notification_id):
     result = get_notification_by_id(notification_id)
+    if result:
+        return jsonify(result)
+    return jsonify({"error": "Not found"}), 404
+
+
+
+@notification_routes.route('/notifications/user/<uuid:user_id>', methods=['GET'])
+def get_by_user(user_id):
+    offset = int(request.args.get('offset', 0))
+    limit = int(request.args.get('limit', 10))
+    result = get_notification_by_user_id(user_id,offset,limit)
     if result:
         return jsonify(result)
     return jsonify({"error": "Not found"}), 404

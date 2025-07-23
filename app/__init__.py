@@ -16,6 +16,7 @@ from app.models.guide_progress_model import GuideProgress
 from app.models.history_model import History
 from app.models.voice_command_model import VoiceCommand
 from dotenv import load_dotenv
+import cloudinary
 
 
 from flask import Flask
@@ -38,7 +39,9 @@ def create_app():
     f"{os.getenv('DB_HOST')}:{int(os.getenv('DB_PORT', 5432))}/{os.getenv('DB_NAME')}")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY", "super-secret-key") 
-    
+
+
+
     
     jwt.init_app(app)
     db.init_app(app) 

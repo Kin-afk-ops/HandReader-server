@@ -23,6 +23,11 @@ def get_notification_by_id(notification_id):
     notif = Notification.query.get(notification_id)
     return notif.to_dict() if notif else None
 
+
+def get_notification_by_user_id(user_id, offset, limit):
+    notifications =  Notification.query.filter_by(user_id=user_id).order_by(Notification.created_at.desc()).offset(offset).limit(limit).all()
+    return [n.to_dict() for n in notifications]
+
 def update_notification(notification_id, data):
     notif = Notification.query.get(notification_id)
     if not notif:

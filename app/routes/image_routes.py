@@ -5,6 +5,7 @@ from app.services.image_service import (
     get_image_by_id_service,
     update_image_service,
     delete_image_service,
+    upload_image_cloudinary
 )
 import uuid
 
@@ -12,12 +13,26 @@ image_routes = Blueprint("image_routes", __name__)
 
 @image_routes.route("/images", methods=["POST"])
 def create_image():
-    data = request.get_json()
     try:
+        if 'image' not in request.files:
+            return jsonify({"error": "No image provided"}), 400
+
+        file = request.files['image']
+        user_id = request.form.get("user_id")
+        source = request.form.get("source", "upload")
+
+        if not user_id:
+            return jsonify({"error": "Missing user_id"}), 400
+       
+        # 📌 GỌI HÀM Ở ĐÂY
+        image_upload = upload_image_cloudinary(file)
+
+
         image = create_image_service(
-            user_id=uuid.UUID(data["user_id"]),
-            source=data["source"],
-            image_url=data["image_url"]
+            user_id=uuid.UUID(user_id),
+            source=source,
+            image_url=image_upload["image_url"],
+            image_public_key=image_upload["public_key"]
         )
         return jsonify({"id": str(image.id)}), 201
     except Exception as e:
