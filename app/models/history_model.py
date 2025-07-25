@@ -20,5 +20,9 @@ class History(db.Model):
             "id": str(self.id),
             "user_id": str(self.user_id),
             "result_id": str(self.result_id),
-            "viewed_at": self.viewed_at.isoformat()
+            "viewed_at": self.viewed_at.isoformat(),
+            "recognized_text": self.result.recognized_text if self.result else None,
+            "confidence": self.result.confidence if self.result else None,
+            "is_saved_by_user": self.result.is_saved_by_user if self.result else None,
+            "created_at": self.result.created_at.isoformat() if self.result and self.result.created_at else None
         }

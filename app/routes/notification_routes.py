@@ -6,7 +6,8 @@ from app.services.notification_service import (
     get_notification_by_id,
     update_notification,
     delete_notification,
-    get_notification_by_user_id
+    get_notification_by_user_id,
+    get_length_user
 )
 
 notification_routes = Blueprint('notification_routes', __name__)
@@ -38,6 +39,16 @@ def get_by_user(user_id):
     if result:
         return jsonify(result)
     return jsonify({"error": "Not found"}), 404
+
+
+@notification_routes.route('/notifications/length/<uuid:user_id>', methods=['GET'])
+def get_length(user_id):
+    try:
+        data = get_length_user(user_id)
+        return jsonify(data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @notification_routes.route('/notifications/<uuid:notification_id>', methods=['PUT'])
 def update(notification_id):

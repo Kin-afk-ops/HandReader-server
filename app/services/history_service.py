@@ -1,6 +1,8 @@
 # app/services/history_service.py
 from app.models.history_model import History
+from app.models.recognition_result_model import RecognitionResult
 from app.extensions import db
+from sqlalchemy import func
 import uuid
 from datetime import datetime
 
@@ -20,6 +22,26 @@ def get_all_histories():
 
 def get_history_by_id(history_id):
     return History.query.get(history_id)
+
+
+def get_history_by_userId(user_id, offset, limit):
+    histories = (
+        db.session.query(History)
+        .join(RecognitionResult, History.result_id == RecognitionResult.id)
+        .filter(History.user_id == user_id)
+        .order_by(History.viewed_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return histories
+
+def get_length_history(user_id):
+    total = db.session.query(func.count(History.id)).filter_by(user_id=user_id).scalar()
+    return {
+        "total": total,
+   }
+   
 
 def update_history(history_id, data):
     history = History.query.get(history_id)

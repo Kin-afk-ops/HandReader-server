@@ -1,6 +1,7 @@
 # app/services/notification_service.py
 from app.models.notification_model import Notification
 from app.extensions import db
+from sqlalchemy import func
 import uuid
 from datetime import datetime
 
@@ -27,6 +28,17 @@ def get_notification_by_id(notification_id):
 def get_notification_by_user_id(user_id, offset, limit):
     notifications =  Notification.query.filter_by(user_id=user_id).order_by(Notification.created_at.desc()).offset(offset).limit(limit).all()
     return [n.to_dict() for n in notifications]
+
+
+def get_length_user(user_id):
+    total = db.session.query(func.count(Notification.id)).filter_by(user_id=user_id).scalar()
+    unread = db.session.query(func.count(Notification.id)).filter_by(user_id=user_id, is_read=False).scalar()
+    return {
+        "total": total,
+        "unread": unread
+    }
+
+
 
 def update_notification(notification_id, data):
     notif = Notification.query.get(notification_id)
