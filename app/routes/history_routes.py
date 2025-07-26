@@ -36,6 +36,21 @@ def get_by_userId(user_id):
     return jsonify(histories_list), 200
 
 
+@history_routes.route("/histories/save/<string:user_id>", methods=["GET"])
+def get_by_save(user_id):
+    offset = int(request.args.get('offset', 0))
+    limit = int(request.args.get('limit', 10))
+    histories = get_history_by_save(user_id,offset,limit)
+   
+
+
+    histories_list = [h.to_dict() for h in histories]
+
+    if not histories_list:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(histories_list), 200
+
+
 @history_routes.route("/histories/length/<string:user_id>", methods=["GET"])
 def get_length(user_id):
     try:

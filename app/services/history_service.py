@@ -36,6 +36,21 @@ def get_history_by_userId(user_id, offset, limit):
     )
     return histories
 
+
+def get_history_by_save(user_id, offset, limit):
+    histories = (
+         db.session.query(History)
+        .join(RecognitionResult, History.result_id == RecognitionResult.id)
+        .filter(History.user_id == user_id)
+        .filter(RecognitionResult.is_saved_by_user == True)
+        .order_by(History.viewed_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return histories
+
+
 def get_length_history(user_id):
     total = db.session.query(func.count(History.id)).filter_by(user_id=user_id).scalar()
     return {
