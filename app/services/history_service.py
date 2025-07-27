@@ -58,6 +58,22 @@ def get_length_history(user_id):
    }
    
 
+def get_length_save(user_id):
+    total = (
+        db.session.query(func.count(History.id))
+        .join(RecognitionResult, History.result_id == RecognitionResult.id)
+        .filter(History.user_id == user_id)
+        .filter(RecognitionResult.is_saved_by_user == True)
+        .scalar()
+    )
+    return {
+        "total": total,
+   }
+   
+
+
+
+
 def update_history(history_id, data):
     history = History.query.get(history_id)
     if not history:

@@ -51,6 +51,16 @@ def get_by_save(user_id):
     return jsonify(histories_list), 200
 
 
+
+
+@history_routes.route("/histories/saveLength/<string:user_id>", methods=["GET"])
+def get_length_save_by_user_id(user_id):
+    try:
+        data = get_length_save(user_id)
+        return jsonify(data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @history_routes.route("/histories/length/<string:user_id>", methods=["GET"])
 def get_length(user_id):
     try:
