@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.services.user_service import create_user_service,update_user_service,delete_user_service,get_user_by_uid_service
 from app.models.user_model import User
+from app.utils.jwt_helper import require_roles,require_admin_or_super_admin,require_super_admin
 
 user_routes = Blueprint("user_routes", __name__)
 
@@ -24,6 +25,7 @@ def create_user():
 from app.services.user_service import get_all_users_service
 
 @user_routes.route("/users", methods=["GET"])
+@require_admin_or_super_admin()
 def get_all_users():
     try:
         users = get_all_users_service()

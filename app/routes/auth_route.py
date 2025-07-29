@@ -5,13 +5,13 @@ auth_route = Blueprint("auth_route", __name__)
 
 @auth_route.route("/login", methods=["POST"])
 def auth_login():
-
     data = request.get_json()
+    if not data:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
     result, error = login_auth_service(data)
     if error:
         return jsonify({"msg": error}), 401
     return jsonify(result), 200
- 
-
 
 

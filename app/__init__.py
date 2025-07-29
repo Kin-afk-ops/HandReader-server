@@ -15,6 +15,7 @@ from app.models.guide_step_model import GuideStep
 from app.models.guide_progress_model import GuideProgress
 from app.models.history_model import History
 from app.models.voice_command_model import VoiceCommand
+from app.models.admin_model import Admin
 from dotenv import load_dotenv
 import cloudinary
 
@@ -72,6 +73,7 @@ def create_app():
     from app.routes.history_routes import history_routes
     from app.routes.voice_command_routes import voice_command_routes
     from app.routes.auth_route import auth_route
+    from app.routes.admin_routes import admin_route
     # from app.routes.speech_routes import speech_route
 
 
@@ -95,6 +97,7 @@ def create_app():
     app.register_blueprint(history_routes)
     app.register_blueprint(voice_command_routes)
     app.register_blueprint(auth_route)
+    app.register_blueprint(admin_route)
     # app.register_blueprint(speech_route)
 
     return app

@@ -5,13 +5,10 @@ from datetime import datetime
 
 def create_user_service(data):
     password = data.get("password")
-    hashed_password = None  # <-- đảm bảo có biến này
-    if password:
-        hashed_password = generate_password_hash(password)
+  
     user = User(
         name=data.get("name"),
         email=data.get("email"),
-        password=hashed_password,
         role=data.get("role", "user")
     )
     db.session.add(user)

@@ -1,40 +1,31 @@
 from app import db
-from app.models.user_model import User
+from app.models.admin_model import Admin
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token
 
 def login_auth_service(data):
-    name = data.get("name")
-    password = data.get("password", None)  
+    username = data.get("username")
+    password = data.get("password")
 
-    if not name:
-        return None, "Missing 'name'"
-    user = User.query.filter_by(name=name).first()
+    if not username or not password:
+        return None, "Username and password are required"
 
-    if user.role == "user":
-        # Không cần password
-        access_token = create_access_token(identity={"id": user.id, "role": user.role})
-        return {
-            "access_token": access_token,
-            "user_id": user.id,
-            "name": user.name,
-            "role": user.role
-        }, None
+    admin = Admin.query.filter_by(username=username).first()
 
-    elif user.role in ["admin", "super_admin"]:
-        if not password:
-            return None, "Password required for admin"
-        if not check_password_hash(user.password, password):
-            return None, "Invalid password"
-        
-        access_token = create_access_token(identity={"id": user.id, "role": user.role})
-        return {
-            "access_token": access_token,
-            "user_id": user.id,
-            "name": user.name,
-            "role": user.role
-        }, None
+    if not admin:
+        return None, "Admin not found"
 
-    else:
-        return None, f"Unknown role '{user.role}'"
+    if not check_password_hash(admin.password, password):
+        return None, "Invalid password"
+    additional_claims = {"role": admin.role}
+    access_token = create_access_token(identity=str(admin.id), additional_claims=additional_claims)
+
+    return {
+        "access_token": access_token,
+        "user_id": admin.id,
+        "username": admin.username,
+        "role": admin.role
+    }, None
+
+
 
