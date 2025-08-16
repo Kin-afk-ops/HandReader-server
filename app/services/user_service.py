@@ -2,6 +2,7 @@ from app import db
 from app.models.user_model import User
 from werkzeug.security import generate_password_hash
 from datetime import datetime
+from sqlalchemy import func, extract
 
 def create_user_service(data):
     password = data.get("password")
@@ -14,6 +15,26 @@ def create_user_service(data):
     db.session.add(user)
     db.session.commit()
     return user
+
+
+def get_user_stats_service():
+    results = (
+        db.session.query(
+            extract("month", User.created_at).label("month"),
+            extract("year", User.created_at).label("year"),
+            func.count(User.id).label("users")
+        )
+        .group_by("year", "month")
+        .order_by("year", "month")
+        .all()
+    )
+
+    data = [
+        {"month": int(month), "year": int(year), "users": count}
+        for month, year, count in results
+    ]
+
+    return data
 
 
 

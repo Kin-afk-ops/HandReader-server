@@ -5,11 +5,20 @@ from app.services.image_service import (
     get_image_by_id_service,
     update_image_service,
     delete_image_service,
-    upload_image_cloudinary
+    upload_image_cloudinary,
+    get_image_stats_service
 )
+from app.utils.jwt_helper import require_roles,require_admin_or_super_admin,require_super_admin
+
 import uuid
 
 image_routes = Blueprint("image_routes", __name__)
+
+@image_routes.route("/images/all", methods=["GET"])
+@require_admin_or_super_admin()
+def get_all_images():
+    images = get_all_images_service()
+    return jsonify(images), 200
 
 @image_routes.route("/images", methods=["POST"])
 def create_image():
@@ -38,21 +47,14 @@ def create_image():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@image_routes.route("/images", methods=["GET"])
-def get_all_images():
-    images = get_all_images_service()
-    return jsonify([
-        {
-            "id": str(img.id),
-            "user_id": str(img.user_id),
-            "source": img.source,
-            "image_url": img.image_url,
-            "created_at": img.created_at.isoformat()
-        }
-        for img in images
-    ])
+@image_routes.route("/images/stats", methods=["GET"])
+@require_admin_or_super_admin()
+def get_stat_image():
+    data = get_image_stats_service()
+    return jsonify(data)
+   
 
-@image_routes.route("/images/<uuid:image_id>", methods=["GET"])
+@image_routes.route("/images/info/<uuid:image_id>", methods=["GET"])
 def get_image_by_id(image_id):
     img = get_image_by_id_service(image_id)
     if not img:

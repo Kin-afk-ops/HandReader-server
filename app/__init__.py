@@ -16,6 +16,7 @@ from app.models.guide_progress_model import GuideProgress
 from app.models.history_model import History
 from app.models.voice_command_model import VoiceCommand
 from app.models.admin_model import Admin
+
 from dotenv import load_dotenv
 import cloudinary
 
@@ -27,12 +28,12 @@ from flask import Flask
 from app.extensions import db  
 
 # Khoi tao jwt 
-jwt = JWTManager()
+
 
 def create_app():
     app = Flask(__name__)
 
-    CORS(app)
+    CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
     load_dotenv()
 
     app.config['SQLALCHEMY_DATABASE_URI'] = (
@@ -40,10 +41,22 @@ def create_app():
     f"{os.getenv('DB_HOST')}:{int(os.getenv('DB_PORT', 5432))}/{os.getenv('DB_NAME')}")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY", "super-secret-key") 
-
-
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    # app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
+    app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
+    app.config["JWT_REFRESH_COOKIE_PATH"] = "/"
+    
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 
     
+
+
+    # # ⚠️ Khi frontend và backend khác origin + HTTPS (ngrok), bắt buộc:
+    app.config['JWT_COOKIE_SAMESITE'] = "None"
+    app.config['JWT_COOKIE_SECURE'] = True  # Bắt buộc nếu SameSite=None 
+
+    jwt = JWTManager()
+
     jwt.init_app(app)
     db.init_app(app) 
 

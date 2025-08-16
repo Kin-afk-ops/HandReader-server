@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.services.user_service import create_user_service,update_user_service,delete_user_service,get_user_by_uid_service
+from app.services.user_service import create_user_service,update_user_service,delete_user_service,get_user_by_uid_service,get_user_stats_service
 from app.models.user_model import User
 from app.utils.jwt_helper import require_roles,require_admin_or_super_admin,require_super_admin
 
@@ -43,8 +43,14 @@ def get_all_users():
     
 
 
+@user_routes.route("/users/stats", methods=["GET"])
+@require_admin_or_super_admin()
+def get_user_stats():
+    data = get_user_stats_service()
+    return jsonify(data)
 
-@user_routes.route("/users/<uuid:user_id>", methods=["GET"])
+
+@user_routes.route("/users/info/<uuid:user_id>", methods=["GET"])
 def get_users(user_id):
     try:
         user = get_user_by_uid_service(user_id)
@@ -91,6 +97,7 @@ def update_user(user_id):
 
 
 @user_routes.route("/users/<uuid:user_id>", methods=["DELETE"])
+@require_admin_or_super_admin()
 def delete_user(user_id):
     try:
         success = delete_user_service(user_id)

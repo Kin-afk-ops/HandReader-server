@@ -16,3 +16,5 @@ class Image(db.Model):
 
     # Quan hệ ngược (nếu cần)
     user = db.relationship('User', backref=db.backref('images', lazy=True))
+
+

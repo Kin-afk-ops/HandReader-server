@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.feedback_service import *
+from app.utils.jwt_helper import require_roles,require_admin_or_super_admin,require_super_admin
 
 feedback_routes = Blueprint("feedback_routes", __name__)
 
@@ -9,23 +10,43 @@ def create():
     feedback = create_feedback(data)
     return jsonify({"id": str(feedback.id)}), 201
 
-@feedback_routes.route("/feedbacks", methods=["GET"])
+@feedback_routes.route("/feedbacks/all", methods=["GET"])
 def get_all():
     feedbacks = get_all_feedbacks()
     return jsonify([
         {
             "id": str(f.id),
             "user_id": str(f.user_id),
-            "result_id": str(f.result_id),
             "message": f.message,
             "status": f.status,
             "created_at": f.created_at.isoformat(),
-            "resolved_at": f.resolved_at.isoformat() if f.resolved_at else None
+            "resolved_at": f.resolved_at.isoformat() if f.resolved_at else None,
+            "result": {
+                "id": str(f.result.id),
+                "recognized_text": f.result.recognized_text,
+                "confidence": f.result.confidence,
+                "is_saved_by_user": f.result.is_saved_by_user,
+                "created_at": f.result.created_at.isoformat(),
+                "image": {
+                    "id": str(f.result.image.id),
+                    "image_url": f.result.image.image_url,
+                    "image_public_key": f.result.image.image_public_key,
+                    "source": f.result.image.source,
+                    "created_at": f.result.image.created_at.isoformat(),
+                },
+            },
         }
         for f in feedbacks
     ])
 
-@feedback_routes.route("/feedbacks/<uuid:feedback_id>", methods=["GET"])
+@feedback_routes.route("/feedback/stats-by-type", methods=["GET"])
+@require_admin_or_super_admin()
+def feedback_stats_by_status():
+    data = get_feedback_stats_by_status()
+    return jsonify(data), 200
+
+
+@feedback_routes.route("/feedbacks/info/<uuid:feedback_id>", methods=["GET"])
 def get_one(feedback_id):
     feedback = get_feedback_by_id(feedback_id)
     if not feedback:
