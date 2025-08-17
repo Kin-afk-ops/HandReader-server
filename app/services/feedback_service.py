@@ -20,11 +20,49 @@ def create_feedback(data):
     db.session.commit()
     return feedback
 
-def get_all_feedbacks():
-    return Feedback.query.options(
-        joinedload(Feedback.result).joinedload(RecognitionResult.image),  # dùng thuộc tính class-bound
-        joinedload(Feedback.user)  # nếu muốn load user luôn
-    ).all()
+def get_all_feedback_service():
+    feedbacks = (
+        Feedback.query.options(
+            joinedload(Feedback.result).joinedload(RecognitionResult.image)  # load result + image luôn
+        )
+        .order_by(Feedback.created_at.desc())
+        .all()
+    )
+
+    result = []
+    for fb in feedbacks:
+        r = fb.result
+        img = r.image if r else None
+
+        result.append({
+            # --- Trường từ Feedback ---
+            "feedback_id": str(fb.id),
+            "user_id": str(fb.user_id),
+            "message": fb.message,
+            "status": fb.status,
+            "created_at": fb.created_at.isoformat(),
+            "resolved_at": fb.resolved_at.isoformat() if fb.resolved_at else None,
+
+            # --- Trường từ RecognitionResult ---
+            **({
+                "result_id": str(r.id),
+                "recognized_text": r.recognized_text,
+                "confidence": r.confidence,
+                "is_saved_by_user": r.is_saved_by_user,
+                "result_created_at": r.created_at.isoformat(),
+            } if r else {}),
+
+            # --- Trường từ Image ---
+            **({
+                "image_id": str(img.id),
+                "image_url": img.image_url,
+                "image_public_key": img.image_public_key,
+                "source": img.source,
+                "image_created_at": img.created_at.isoformat(),
+            } if img else {})
+        })
+
+    return result
 
 def get_feedback_by_id(feedback_id):
     return Feedback.query.get(feedback_id)

@@ -1,8 +1,10 @@
 from app.models.image_model import Image
 from app.models.recognition_result_model import RecognitionResult
+from app.models.history_model import History
 from app.extensions import db
 from sqlalchemy import func, extract
 from sqlalchemy.orm import joinedload
+from cloudinary.uploader import destroy
 
 
 
@@ -39,32 +41,50 @@ def create_image_service(user_id, source, image_url, image_public_key):
     db.session.commit()
     return image
 
+
 def get_all_images_service():
-    images = Image.query.options(
-        joinedload(Image.recognition_results)  
-    ).all()
+    images = (
+        Image.query.options(
+            joinedload(Image.recognition_results).joinedload(RecognitionResult.feedbacks)  # load luôn feedback
+        )
+        .order_by(Image.created_at.desc()) 
+        .all()
+    )
 
     result = []
     for img in images:
-        # lấy result đầu tiên (vì chỉ có 1)
         r = img.recognition_results[0] if img.recognition_results else None
+        f = r.feedbacks[0] if (r and r.feedbacks) else None  # lấy feedback đầu tiên nếu có
 
         result.append({
+            # --- Trường từ Image ---
             "id": str(img.id),
             "user_id": str(img.user_id),
             "source": img.source,
             "image_url": img.image_url,
             "image_public_key": img.image_public_key,
             "created_at": img.created_at.isoformat(),
-            # gộp trực tiếp các trường của recognition_result
+
+            # --- Trường từ RecognitionResult ---
             **({
                 "recognized_text": r.recognized_text,
                 "confidence": r.confidence,
                 "is_saved_by_user": r.is_saved_by_user,
-                "result_created_at": r.created_at.isoformat()
-            } if r else {})
+                "result_created_at": r.created_at.isoformat(),
+            } if r else {}),
+
+            # --- Trường từ Feedback ---
+            **({
+                "feedback_id": str(f.id),
+                "feedback_message": f.message,
+                "feedback_status": f.status,
+                "feedback_created_at": f.created_at.isoformat(),
+                "feedback_resolved_at": f.resolved_at.isoformat() if f.resolved_at else None,
+            } if f else {})
         })
+
     return result
+
 
 def get_image_by_id_service(image_id):
     return Image.query.get(image_id)
@@ -98,13 +118,33 @@ def update_image_service(image_id, data):
     db.session.commit()
     return image
 
-def delete_image_service(image_id):
+def delete_image_service(image_id: str):
     image = Image.query.get(image_id)
     if not image:
         return None
+
+    # --- Xoá feedback & history trước ---
+    for result in image.recognition_results:
+        # Xoá history gắn với result
+        for h in result.histories:
+            db.session.delete(h)
+
+        # Xoá feedback gắn với result
+        for fb in result.feedbacks:
+            db.session.delete(fb)
+
+        # Xoá result
+        db.session.delete(result)
+
+    # --- Xoá ảnh trên Cloudinary ---
+    if image.image_public_key:
+        try:
+            destroy(image.image_public_key)
+        except Exception as e:
+            print(f"Lỗi xoá Cloudinary: {e}")
+
+    # --- Xoá image cuối cùng ---
     db.session.delete(image)
-    db.session.query(RecognitionResult).filter_by(image_id=image_id).delete()
+
     db.session.commit()
     return image
-
-
